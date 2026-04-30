@@ -1,0 +1,5 @@
+// p01-thermometer — DHT11 temperature and humidity monitor
+// Demonstrates: ScheduledExecutorService, enum state machine, CSV logging, LCD display
+dependencies {
+    implementation project(':core')
+}

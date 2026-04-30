@@ -1,0 +1,5 @@
+// p05-radar — Ultrasonic Radar with servo sweep
+// Demonstrates: PWM servo control, GPIO timing, JSON export, distance zones
+dependencies {
+    implementation project(':core')
+}

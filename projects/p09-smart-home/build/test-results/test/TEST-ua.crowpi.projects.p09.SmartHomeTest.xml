@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.projects.p09.SmartHomeTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-03-29T17:40:13" hostname="a0" time="0.769">
+  <properties/>
+  <testcase name="testProfileRepository_findByName_notFound()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.604"/>
+  <testcase name="testDeviceEvent_nullableFields_roundtrip()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.009"/>
+  <testcase name="testDeviceEventRepository_findRecent_respectsLimit()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.002"/>
+  <testcase name="testDeviceEventRepository_countByType()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.002"/>
+  <testcase name="testAutoTempControl_fanOnWhenHot()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.083"/>
+  <testcase name="testMenuNavigator_lightToggle_callsController()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.046"/>
+  <testcase name="testDatabaseManager_createTablesIdempotent()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.002"/>
+  <testcase name="testDatabaseManager_seedDefaultProfiles_insertsMissingProfiles()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.004"/>
+  <testcase name="testProfileRepository_update_persistsChanges()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.002"/>
+  <testcase name="testProfileRepository_saveAndFind()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.003"/>
+  <testcase name="testDeviceEventRepository_insertAndFindRecent()" classname="ua.crowpi.projects.p09.SmartHomeTest" time="0.002"/>
+  <system-out><![CDATA[[MOCK SENSOR] read() → DhtReading{temp=30.0°C, humidity=60%}
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

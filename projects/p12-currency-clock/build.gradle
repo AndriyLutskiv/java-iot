@@ -1,0 +1,5 @@
+// p12-currency-clock — Currency & Clock Display
+// Demonstrates: java.net.http.HttpClient (Java 11), Jackson JSON, I²C LCD, ScheduledExecutorService
+dependencies {
+    implementation project(':core')
+}

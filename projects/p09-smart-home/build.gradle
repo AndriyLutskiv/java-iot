@@ -1,0 +1,6 @@
+// p09-smart-home — Smart Home Assistant with SQLite persistence
+// Demonstrates: JDBC, repository pattern, FSM menu, multi-threading, ScheduledExecutorService
+dependencies {
+    implementation project(':core')
+    // sqlite-jdbc, log4j, commons-cli — inherited from root subprojects block
+}

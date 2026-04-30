@@ -1,0 +1,90 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'  // v7 для Java 11
+}
+
+allprojects {
+    group = 'ua.crowpi'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    dependencies {
+        // Pi4J v1.4 — єдина версія що підтримує RPi 3 GPIO
+        implementation 'com.pi4j:pi4j-core:1.4'
+
+        // Apache Commons CLI — парсинг аргументів командного рядка
+        implementation 'commons-cli:commons-cli:1.5.0'
+
+        // Log4j 2 — логування
+        implementation 'org.apache.logging.log4j:log4j-api:2.20.0'
+        implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+
+        // Apache Commons Lang — утиліти для рядків, рефлексії
+        implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+        // Apache Commons CSV — запис CSV файлів (p07, p10)
+        implementation 'org.apache.commons:commons-csv:1.10.0'
+
+        // Jackson — JSON серіалізація/десеріалізація (p09, p11)
+        implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.2'
+
+        // SQLite JDBC (p09-smart-home)
+        implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
+
+        // JUnit 5
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.3'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+
+        // Mockito — мокування залежностей у тестах
+        testImplementation 'org.mockito:mockito-core:4.11.0'
+        testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
+
+// Залежності root-проекту — включаємо всі реалізовані підпроекти у fat JAR
+dependencies {
+    implementation project(':core')
+    implementation project(':projects:p01-thermometer')
+    implementation project(':projects:p02-counter')
+    implementation project(':projects:p03-music-box')
+    implementation project(':projects:p04-alarm')
+    implementation project(':projects:p05-radar')
+    implementation project(':projects:p06-reaction')
+    implementation project(':projects:p07-greenhouse')
+    implementation project(':projects:p08-rfid')
+    implementation project(':projects:p09-smart-home')
+    implementation project(':projects:p10-meteostation')
+    implementation project(':projects:p11-lcd-game')
+    implementation project(':projects:p12-currency-clock')
+}
+
+// Fat JAR збирається тільки в root
+shadowJar {
+    archiveBaseName = 'crowpi-suite'
+    archiveClassifier = ''
+    archiveVersion = '1.0.0'
+    manifest {
+        attributes 'Main-Class': 'ua.crowpi.core.launcher.Launcher'
+    }
+    // runtimeClasspath тепер містить core + всі реалізовані проекти + їхні транзитивні залежності
+    configurations = [project.configurations.runtimeClasspath]
+    // Об'єднуємо всі META-INF/services файли — необхідно для ServiceLoader discovery
+    mergeServiceFiles()
+}

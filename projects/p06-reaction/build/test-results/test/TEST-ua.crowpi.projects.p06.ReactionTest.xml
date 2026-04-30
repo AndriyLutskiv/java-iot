@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.projects.p06.ReactionTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-03-29T17:40:10" hostname="a0" time="0.452">
+  <properties/>
+  <testcase name="testPlayerStats_average()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.437"/>
+  <testcase name="testGameSession_getWinner_player1Wins()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.001"/>
+  <testcase name="testReactionEngine_falseStartDetected()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.001"/>
+  <testcase name="testGameSession_getWinner_draw()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.002"/>
+  <testcase name="testPlayerStats_min()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.002"/>
+  <testcase name="testGameRound_falseStartPenalty()" classname="ua.crowpi.projects.p06.ReactionTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

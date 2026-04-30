@@ -1,0 +1,223 @@
+@startuml p06-reaction-classes
+' ============================================================
+' PlantUML class diagram — p06 Reaction Speed Trainer
+' ============================================================
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam backgroundColor #FAFAFA
+skinparam classBorderColor #4A90D9
+skinparam classHeaderBackgroundColor #D6E8F7
+skinparam arrowColor #4A90D9
+skinparam noteBackgroundColor #FFFDE7
+skinparam noteBorderColor #F9A825
+
+' ============================================================
+' Core interface (from :core module)
+' ============================================================
+package "ua.crowpi.core" #EEF5FF {
+    interface CrowPiProject {
+        +getName() : String
+        +getProjectId() : String
+        +getDescription() : String
+        +run(mockMode : boolean) : void
+        +shutdown() : void
+    }
+}
+
+' ============================================================
+' Hardware facades (from :core module)
+' ============================================================
+package "ua.crowpi.core.hardware" #EEF5FF {
+    interface GpioFacade {
+        +setOutput(pin : int, high : boolean) : void
+        +readInput(pin : int) : boolean
+        +addListener(pin : int, listener : PinChangeListener) : void
+        +pwm(pin : int, frequencyHz : int, dutyCycle : float) : void
+        +close() : void
+    }
+
+    interface I2cFacade {
+        +writeByte(deviceAddr : int, register : int, value : byte) : void
+        +readByte(deviceAddr : int, register : int) : byte
+        +readBytes(deviceAddr : int, register : int, length : int) : byte[]
+    }
+
+    interface PinChangeListener <<FunctionalInterface>> {
+        +onPinChange(pin : int, high : boolean) : void
+    }
+}
+
+' ============================================================
+' p06 domain model
+' ============================================================
+package "ua.crowpi.projects.p06" #F0FAF0 {
+
+    class Player {
+        -name : String
+        -score : int
+        -reactionTimesMs : List<Long>
+        --
+        +Player(name : String)
+        +addScore(delta : int) : void
+        +addReactionTime(ms : long) : void
+        +getName() : String
+        +getScore() : int
+        +setScore(score : int) : void
+        +getReactionTimesMs() : List<Long>
+    }
+
+    class GameRound {
+        -stimulusTimeMs : long
+        -p1PressTimeMs : long
+        -p2PressTimeMs : long
+        -winner : Player
+        --
+        +GameRound(stimulusTimeMs : long,\n  p1PressTimeMs : long,\n  p2PressTimeMs : long)
+        +applyScores(p1 : Player, p2 : Player) : void
+        +getStimulusTimeMs() : long
+        +getP1PressTimeMs() : long
+        +getP2PressTimeMs() : long
+        +getWinner() : Player
+    }
+
+    class GameSession {
+        -p1 : Player
+        -p2 : Player
+        -rounds : List<GameRound>
+        --
+        +GameSession(p1 : Player, p2 : Player)
+        +addRound(round : GameRound) : void
+        +getRounds() : List<GameRound>
+        +getWinner() : Player
+        +calcStats() : void
+        +getP1() : Player
+        +getP2() : Player
+    }
+
+    class PlayerStats {
+        -times : List<Long>
+        --
+        +PlayerStats(times : List<Long>)
+        +getAverage() : double
+        +getMin() : long
+        +getMax() : long
+        +getCount() : int
+    }
+
+    class StimulusGenerator {
+        +{static} RGB_RED_PIN : int = 11
+        +{static} RGB_GREEN_PIN : int = 9
+        +{static} RGB_BLUE_PIN : int = 10
+        -gpio : GpioFacade
+        -random : Random
+        --
+        +StimulusGenerator(gpio : GpioFacade)
+        +generate() : long
+        +stopFlash() : void
+    }
+
+    class VictoryJingle {
+        +{static} BUZZER_PIN : int = 18
+        -{static} NOTE_DURATION_MS : int = 200
+        -{static} DUTY_CYCLE : float = 0.5
+        -gpio : GpioFacade
+        --
+        +VictoryJingle(gpio : GpioFacade)
+        +play(winnerName : String) : void
+    }
+
+    class ReactionEngine {
+        +{static} BUTTON_P1 : int = 26
+        +{static} BUTTON_P2 : int = 19
+        +{static} ROUNDS : int = 5
+        -gpio : GpioFacade
+        -lcd : I2cFacade
+        -stimGen : StimulusGenerator
+        ~p1 : Player
+        ~p2 : Player
+        ~session : GameSession
+        --
+        +ReactionEngine(gpio : GpioFacade,\n  lcd : I2cFacade,\n  stimGen : StimulusGenerator)
+        +run() : GameSession
+        +runOneRound(stimulusTime : long,\n  p1PressTime : long,\n  p2PressTime : long) : GameSession
+        +getP1() : Player
+        +getP2() : Player
+        -lcdWriteLine(row : int, text : String) : void
+    }
+
+    class ReactionProject {
+        -gpio : GpioFacade
+        -lcd : I2cFacade
+        --
+        +getName() : String
+        +getProjectId() : String
+        +getDescription() : String
+        +run(mockMode : boolean) : void
+        +shutdown() : void
+        -printResults(session : GameSession) : void
+        -printPlayerResult(player : Player) : void
+    }
+}
+
+' ============================================================
+' Relationships
+' ============================================================
+
+' ReactionProject implements the top-level contract
+ReactionProject ..|> CrowPiProject
+
+' Engine holds hardware references
+ReactionEngine --> GpioFacade
+ReactionEngine --> I2cFacade
+ReactionEngine --> StimulusGenerator
+ReactionEngine --> GameSession
+ReactionEngine --> Player : p1 / p2
+
+' Session owns rounds and players
+GameSession o--> "2" Player
+GameSession o--> "*" GameRound
+
+' Round references the winner player
+GameRound --> Player : winner
+
+' Stats consumes a player's time list
+PlayerStats ..> Player : uses reactionTimesMs
+
+' Hardware component dependencies
+StimulusGenerator --> GpioFacade
+VictoryJingle --> GpioFacade
+
+' GPIO facade uses PinChangeListener callback
+GpioFacade --> PinChangeListener : callbacks
+
+' Project creates and wires components
+ReactionProject --> ReactionEngine
+ReactionProject --> StimulusGenerator
+ReactionProject --> VictoryJingle
+ReactionProject --> GpioFacade
+ReactionProject --> I2cFacade
+
+' ============================================================
+' Notes
+' ============================================================
+note right of ReactionEngine
+  Uses **AtomicLong** per player to capture
+  button-press timestamps from GPIO listener
+  threads safely during the response window.
+end note
+
+note bottom of GameRound
+  applyScores() rules:
+  1. Press before stimulus → false start (-1)
+  2. First valid press after stimulus → win (+1)
+  3. 0 = did not press
+end note
+
+note right of StimulusGenerator
+  Waits random 1000–4000 ms then
+  drives BCM 9/10/11 HIGH simultaneously
+  (white flash). Returns exact flash time.
+end note
+
+@enduml

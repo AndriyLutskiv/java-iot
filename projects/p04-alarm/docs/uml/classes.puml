@@ -1,0 +1,185 @@
+@startuml p04-alarm-classes
+title p04 Alarm System — Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam linetype ortho
+
+' ─── Core interfaces ────────────────────────────────────────────────────────
+interface CrowPiProject <<interface>> {
+    +getName() : String
+    +getProjectId() : String
+    +getDescription() : String
+    +run(mockMode : boolean) : void
+    +shutdown() : void
+}
+
+interface GpioFacade <<interface>> {
+    +setOutput(pin : int, high : boolean) : void
+    +readInput(pin : int) : boolean
+    +addListener(pin : int, listener : PinChangeListener) : void
+    +pwm(pin : int, frequencyHz : int, dutyCycle : float) : void
+    +close() : void
+}
+
+interface I2cFacade <<interface>> {
+    +writeByte(deviceAddr : int, register : int, value : byte) : void
+    +readByte(deviceAddr : int, register : int) : byte
+    +readBytes(deviceAddr : int, register : int, length : int) : byte[]
+}
+
+' ─── Enums ──────────────────────────────────────────────────────────────────
+enum AlarmState {
+    DISARMED
+    ARMED
+    TRIGGERED
+    LOCKED
+}
+
+enum AlarmEvent {
+    PIR_TRIGGERED
+    CORRECT_PIN
+    WRONG_PIN
+    LOCK_EXPIRED
+}
+
+' ─── Domain classes ─────────────────────────────────────────────────────────
+class AlarmFsm {
+    -transitions : Map<AlarmState, Map<AlarmEvent, AlarmState>>
+    -currentState : AlarmState
+    +AlarmFsm()
+    +transition(event : AlarmEvent) : AlarmState
+    +getState() : AlarmState
+    +reset() : void
+    ~setState(state : AlarmState) : void
+}
+
+class PinValidator {
+    -{static} MAX_FAILS : int = 3
+    -expectedHash : String
+    -failCount : int
+    +PinValidator(expectedHash : String)
+    +validate(pin : String) : boolean
+    +getFailCount() : int
+    +isLockedOut() : boolean
+    +reset() : void
+    +{static} sha256(input : String) : String
+}
+
+class AlarmConfig {
+    -pinHash : String
+    -lockoutDurationSeconds : int
+    -logFile : String
+    +AlarmConfig()
+    +getPinHash() : String
+    +getLockoutDurationSeconds() : int
+    +getLogFile() : String
+}
+
+class AlarmLogger {
+    -logger : Logger
+    +AlarmLogger(loggerName : String)
+    +logEvent(from : AlarmState, event : AlarmEvent, to : AlarmState) : void
+    +logPinAttempt(success : boolean, failCount : int) : void
+    +logError(message : String, cause : Throwable) : void
+}
+
+class RelayController {
+    +{static} RELAY1_PIN : int = 21
+    -gpio : GpioFacade
+    -active : boolean
+    +RelayController(gpio : GpioFacade)
+    +activate() : void
+    +deactivate() : void
+    +isActive() : boolean
+}
+
+class SirenPlayer {
+    +{static} SIREN_PIN : int = 18
+    +{static} FREQ_HIGH : int = 880
+    +{static} FREQ_LOW : int = 660
+    +{static} INTERVAL_MS : int = 300
+    -gpio : GpioFacade
+    -playing : volatile boolean
+    -sirenThread : Thread
+    +SirenPlayer(gpio : GpioFacade)
+    +start() : void
+    +stop() : void
+    +isPlaying() : boolean
+}
+
+class KeypadReader {
+    +{static} ROW_PINS : int[]
+    +{static} COL_PINS : int[]
+    -{static} KEYS : char[][]
+    -gpio : GpioFacade
+    -mockQueue : Queue<Character>
+    +KeypadReader(gpio : GpioFacade)
+    +readKey() : char
+    +readPin(length : int) : String
+    +offerMockKey(key : char) : void
+}
+
+class AlarmProject {
+    -{static} PIR_PIN : int = 26
+    -fsm : AlarmFsm
+    -gpio : GpioFacade
+    -lcd : I2cFacade
+    -pinValidator : PinValidator
+    -relay : RelayController
+    -siren : SirenPlayer
+    -keypad : KeypadReader
+    -alarmLogger : AlarmLogger
+    -config : AlarmConfig
+    -lockoutScheduler : ScheduledExecutorService
+    -pirTriggered : volatile boolean
+    -running : volatile boolean
+    +AlarmProject()
+    +AlarmProject(fsm : AlarmFsm, gpio : GpioFacade, lcd : I2cFacade)
+    +getName() : String
+    +getProjectId() : String
+    +getDescription() : String
+    +run(mockMode : boolean) : void
+    +shutdown() : void
+    -applyStateActions() : void
+    -activateLockout() : void
+    -readPinWithDisplay(length : int) : String
+    -updateDisplay(pinSuffix : String, override : String) : void
+    -lcdWriteLine(row : int, text : String) : void
+    -setRgbColor(red : boolean, green : boolean, blue : boolean) : void
+}
+
+' ─── Relationships ───────────────────────────────────────────────────────────
+AlarmProject ..|> CrowPiProject
+AlarmProject --> AlarmFsm
+AlarmProject --> PinValidator
+AlarmProject --> RelayController
+AlarmProject --> SirenPlayer
+AlarmProject --> KeypadReader
+AlarmProject --> AlarmLogger
+AlarmProject --> AlarmConfig
+AlarmProject --> GpioFacade
+AlarmProject --> I2cFacade
+
+AlarmFsm --> AlarmState
+AlarmFsm --> AlarmEvent
+
+RelayController --> GpioFacade
+SirenPlayer --> GpioFacade
+KeypadReader --> GpioFacade
+
+AlarmLogger ..> AlarmState
+AlarmLogger ..> AlarmEvent
+
+note right of AlarmFsm
+  Transition table built once in constructor.
+  Undefined transitions are silently ignored.
+end note
+
+note bottom of PinValidator
+  PIN stored as SHA-256 hex digest only.
+  Lockout after 3 consecutive failures.
+end note
+
+@enduml

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.core.util.PropertiesLoaderTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-04-02T07:08:08" hostname="a0" time="0.073">
+  <properties/>
+  <testcase name="testLoad_nonExistentResource_throwsConfigException()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.004"/>
+  <testcase name="testGetDouble_integerString_returnsParsedAsDouble()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <testcase name="testGetStringOrDefault_missingKey_returnsDefault()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <testcase name="testGetString_presentKey_returnsValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <testcase name="testGetIntOrDefault_validValue_returnsParsedValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.004"/>
+  <testcase name="testGetIntOrDefault_missingKey_returnsDefault()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <testcase name="testGetInt_validInteger_returnsParsedValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.003"/>
+  <testcase name="testGetInt_nonNumericValue_throwsConfigException()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.002"/>
+  <testcase name="testGetString_blankValue_throwsConfigException()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.005"/>
+  <testcase name="testGetString_missingKey_throwsConfigException()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.004"/>
+  <testcase name="testGetDouble_validDouble_returnsParsedValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <testcase name="testGetInt_negativeInteger_returnsParsedValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.004"/>
+  <testcase name="testGetIntOrDefault_malformedValue_returnsDefault()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.004"/>
+  <testcase name="testGetString_trailingWhitespaceIsTrimmed()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.002"/>
+  <testcase name="testGetStringOrDefault_presentKey_returnsActualValue()" classname="ua.crowpi.core.util.PropertiesLoaderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

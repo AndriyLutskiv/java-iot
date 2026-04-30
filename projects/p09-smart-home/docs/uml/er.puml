@@ -1,0 +1,44 @@
+@startuml smart_home_er
+!theme plain
+title Smart Home Assistant — ER Diagram
+
+entity "profiles" {
+    * id : INTEGER <<PK, AUTOINCREMENT>>
+    --
+    * name : TEXT <<UNIQUE>>
+    * temp_threshold_c : REAL
+    * light_on : INTEGER
+    * fan_on : INTEGER
+    * created_at : TEXT
+}
+
+entity "device_events" {
+    * id : INTEGER <<PK, AUTOINCREMENT>>
+    --
+    * event_type : TEXT
+    * device : TEXT
+    old_state : TEXT
+    * new_state : TEXT
+    profile_id : INTEGER <<FK>>
+    * timestamp : TEXT
+}
+
+profiles ||--o{ device_events : "referenced by"
+
+note right of device_events
+    event_type values:
+    LIGHT_ON, LIGHT_OFF,
+    FAN_ON, FAN_OFF,
+    PROFILE_SWITCH,
+    TEMP_ALERT,
+    TIMER_EXPIRED,
+    SYSTEM_START
+end note
+
+note right of profiles
+    Default profiles:
+    DAY (threshold 26°C)
+    NIGHT (threshold 22°C)
+    VACATION (threshold 30°C)
+end note
+@enduml

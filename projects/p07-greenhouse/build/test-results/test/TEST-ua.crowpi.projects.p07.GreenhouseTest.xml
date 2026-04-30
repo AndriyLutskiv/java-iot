@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.projects.p07.GreenhouseTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-03-29T17:40:11" hostname="a0" time="0.045">
+  <properties/>
+  <testcase name="testActuatorState_withPump()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.022"/>
+  <testcase name="testManualOverride_overridesAutoLogic()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.007"/>
+  <testcase name="testGreenhouseController_bothOnWhenDryAndHot()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.002"/>
+  <testcase name="testGreenhouseController_allOffWhenNormal()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.002"/>
+  <testcase name="testGreenhouseController_pumpOnWhenDrySoil()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.002"/>
+  <testcase name="testActuatorState_of()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.001"/>
+  <testcase name="testGreenhouseController_fanOnWhenHot()" classname="ua.crowpi.projects.p07.GreenhouseTest" time="0.002"/>
+  <system-out><![CDATA[[OVERRIDE] Pump forced → ON
+[CONTROLLER] soil=60% (min=40), temp=22.0C (max=30.0), forced=true → pump=ON, fan=OFF
+[CONTROLLER] soil=20% (min=40), temp=35.0C (max=30.0), forced=false → pump=ON, fan=ON
+[CONTROLLER] soil=60% (min=40), temp=22.0C (max=30.0), forced=false → pump=OFF, fan=OFF
+[CONTROLLER] soil=20% (min=40), temp=22.0C (max=30.0), forced=false → pump=ON, fan=OFF
+[CONTROLLER] soil=60% (min=40), temp=35.0C (max=30.0), forced=false → pump=OFF, fan=ON
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

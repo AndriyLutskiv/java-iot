@@ -1,0 +1,236 @@
+@startuml p09_smart_home_classes
+!theme plain
+title p09 — Smart Home Assistant — Class Diagram
+
+package "ua.crowpi.projects.p09" {
+
+    class SmartHomeProject {
+        + getName() : String
+        + getProjectId() : String
+        + run(mockMode : boolean) : void
+        + shutdown() : void
+        - loadActiveProfile(repo) : Profile
+        - logSystemEvent(repo, type, pid) : void
+    }
+
+    ' ---- POJOs ----
+    class Profile {
+        - id : int
+        - name : String
+        - tempThreshold : double
+        - lightOn : boolean
+        - fanOn : boolean
+        - createdAt : String
+        + getters / setters
+    }
+
+    class DeviceEvent {
+        - id : int
+        - eventType : String
+        - device : String
+        - oldState : String
+        - newState : String
+        - profileId : Integer
+        - timestamp : String
+        + {static} of(...) : DeviceEvent
+        + getters / setters
+    }
+
+    class DhtReading {
+        - temperatureC : double
+        - humidity : double
+    }
+
+    class DeviceState {
+        - lightOn : volatile boolean
+        - fanOn : volatile boolean
+        - activeProfileName : volatile String
+    }
+
+    ' ---- Database layer ----
+    class DatabaseManager {
+        - connection : Connection
+        + {static} forFile(path) : DatabaseManager
+        + createTables() : void
+        + seedDefaultProfiles(repo) : void
+        + getConnection() : Connection
+        + close() : void
+    }
+
+    class ProfileRepository {
+        - connection : Connection
+        + findAll() : List<Profile>
+        + findByName(name) : Optional<Profile>
+        + save(profile) : Profile
+        + update(profile) : void
+    }
+
+    class DeviceEventRepository {
+        - connection : Connection
+        + insert(event) : void
+        + findRecent(limit) : List<DeviceEvent>
+        + countByType(type) : int
+    }
+
+    ' ---- Hardware controllers ----
+    class LightController {
+        + {static} RELAY1_PIN : int = 21
+        - on : boolean
+        + turnOn() : void
+        + turnOff() : void
+        + toggle() : void
+        + isOn() : boolean
+    }
+
+    class FanController {
+        + {static} RELAY2_PIN : int = 20
+        - on : volatile boolean
+        + turnOn() : void
+        + turnOff() : void
+        + toggle() : void
+        + isOn() : boolean
+    }
+
+    class Dht11Reader {
+        + {static} DHT11_PIN : int = 4
+        + read() : DhtReading
+    }
+
+    ' ---- Auto control ----
+    class AutoTempControl {
+        - sensor : SensorReader<DhtReading>
+        - fan : FanController
+        - eventRepo : DeviceEventRepository
+        - activeProfile : volatile Profile
+        - running : volatile boolean
+        + start() : void
+        + stopMonitoring() : void
+        + setActiveProfile(profile) : void
+        + run() : void
+        ~ checkTemperature() : void
+    }
+
+    ' ---- Menu system ----
+    interface MenuItem {
+        + getLabel() : String
+        + execute() : void
+    }
+
+    interface NavigationInput {
+        + poll(timeoutMs : long) : NavAction
+    }
+
+    enum "NavigationInput.NavAction" {
+        UP
+        DOWN
+        SELECT
+        BACK
+    }
+
+    class MenuNavigator {
+        - items : List<MenuItem>
+        - currentIndex : int
+        + addItem(item) : void
+        + run(input) : void
+        + step(action) : boolean
+        + setCurrentIndex(index) : void
+        + getCurrentIndex() : int
+        - renderCurrent() : void
+    }
+
+    class InputRouter {
+        + {static} PIN_UP : int = 26
+        + {static} PIN_DOWN : int = 19
+        + {static} PIN_SELECT : int = 13
+        + {static} PIN_BACK : int = 6
+        - queue : BlockingQueue<NavAction>
+        + poll(timeoutMs) : NavAction
+    }
+
+    class ConsoleNavigationInput {
+        - queue : BlockingQueue<NavAction>
+        + poll(timeoutMs) : NavAction
+        + stop() : void
+    }
+
+    class LcdHelper {
+        + {static} LCD_ADDR : int = 0x27
+        + {static} writeLine(lcd, row, text) : void
+        + {static} init(lcd) : void
+    }
+
+    ' ---- MenuItem implementations ----
+    class TemperatureMenuItem
+    class LightMenuItem
+    class FanMenuItem
+    class TimerMenuItem {
+        - scheduler : ScheduledExecutorService
+        - activeTimer : ScheduledFuture<?>
+        + cancel() : void
+    }
+    class SwitchProfileMenuItem
+    class ViewEventLogMenuItem
+    class SaveStateMenuItem
+
+    ' ---- Relations ----
+    SmartHomeProject ..|> CrowPiProject
+    SmartHomeProject --> DatabaseManager
+    SmartHomeProject --> ProfileRepository
+    SmartHomeProject --> DeviceEventRepository
+    SmartHomeProject --> MenuNavigator
+    SmartHomeProject --> AutoTempControl
+    SmartHomeProject --> LightController
+    SmartHomeProject --> FanController
+    SmartHomeProject --> DeviceState
+
+    DatabaseManager "1" --> "1" ProfileRepository : supplies Connection
+    DatabaseManager "1" --> "1" DeviceEventRepository : supplies Connection
+
+    ProfileRepository ..> Profile
+    DeviceEventRepository ..> DeviceEvent
+
+    AutoTempControl --> FanController
+    AutoTempControl --> DeviceEventRepository
+    AutoTempControl ..> DhtReading
+
+    LightController --> GpioFacade
+    FanController --> GpioFacade
+    Dht11Reader ..|> SensorReader
+
+    MenuNavigator "1" o-- "*" MenuItem
+    MenuNavigator --> LcdHelper
+    InputRouter ..|> NavigationInput
+    ConsoleNavigationInput ..|> NavigationInput
+
+    LightMenuItem ..|> MenuItem
+    FanMenuItem ..|> MenuItem
+    TemperatureMenuItem ..|> MenuItem
+    TimerMenuItem ..|> MenuItem
+    SwitchProfileMenuItem ..|> MenuItem
+    ViewEventLogMenuItem ..|> MenuItem
+    SaveStateMenuItem ..|> MenuItem
+
+    LightMenuItem --> LightController
+    LightMenuItem --> DeviceEventRepository
+    FanMenuItem --> FanController
+    FanMenuItem --> DeviceEventRepository
+    TemperatureMenuItem ..> DhtReading
+    SwitchProfileMenuItem --> ProfileRepository
+    SwitchProfileMenuItem --> AutoTempControl
+    SaveStateMenuItem --> ProfileRepository
+    ViewEventLogMenuItem --> DeviceEventRepository
+
+    note right of DatabaseManager
+        Accessed from:
+        - ProfileRepository
+        - DeviceEventRepository
+        Both receive the same
+        Connection instance.
+    end note
+}
+
+interface CrowPiProject
+interface GpioFacade
+interface SensorReader<T>
+
+@enduml

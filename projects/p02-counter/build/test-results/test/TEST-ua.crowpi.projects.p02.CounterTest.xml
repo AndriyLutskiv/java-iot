@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.projects.p02.CounterTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-03-29T20:52:40" hostname="a0" time="0.123">
+  <properties/>
+  <testcase name="testSevenSegmentDisplay_digit5_correctSegments()" classname="ua.crowpi.projects.p02.CounterTest" time="0.027"/>
+  <testcase name="testEventRecord_toLogLine_countdownMode()" classname="ua.crowpi.projects.p02.CounterTest" time="0.005"/>
+  <testcase name="testEventFileLogger_createsFileAndWritesLine(Path)" classname="ua.crowpi.projects.p02.CounterTest" time="0.035"/>
+  <testcase name="testEventRecord_getters_returnConstructorValues()" classname="ua.crowpi.projects.p02.CounterTest" time="0.001"/>
+  <testcase name="testEventFileLogger_appendsMultipleLines(Path)" classname="ua.crowpi.projects.p02.CounterTest" time="0.003"/>
+  <testcase name="testCounterMode_doubleToogle_returnsOriginal()" classname="ua.crowpi.projects.p02.CounterTest" time="0.001"/>
+  <testcase name="testSevenSegmentDisplay_digit0_correctSegments()" classname="ua.crowpi.projects.p02.CounterTest" time="0.007"/>
+  <testcase name="testSevenSegmentDisplay_invalidDigit_throwsException()" classname="ua.crowpi.projects.p02.CounterTest" time="0.012"/>
+  <testcase name="testCounterMode_toggle()" classname="ua.crowpi.projects.p02.CounterTest" time="0.0"/>
+  <testcase name="testCounterMode_getLabel_notBlank()" classname="ua.crowpi.projects.p02.CounterTest" time="0.002"/>
+  <testcase name="testEventRecord_toLogLine()" classname="ua.crowpi.projects.p02.CounterTest" time="0.001"/>
+  <testcase name="testSevenSegmentMapping_allDigits()" classname="ua.crowpi.projects.p02.CounterTest" time="0.008"/>
+  <testcase name="testCounterProject_identity()" classname="ua.crowpi.projects.p02.CounterTest" time="0.002"/>
+  <system-out><![CDATA[[MOCK I2C] write → addr=0x70 reg=0x21 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x81 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0xEF val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x02 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x04 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x06 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x08 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0A val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0C val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0E val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x21 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x81 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0xEF val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x02 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x04 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x06 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x08 val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0A val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0C val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x0E val=0x00
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x3F
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x06
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x5B
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x4F
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x66
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x6D
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x7D
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x07
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x7F
+[MOCK I2C] write → addr=0x70 reg=0x00 val=0x6F
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

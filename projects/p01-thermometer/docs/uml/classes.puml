@@ -1,0 +1,161 @@
+@startuml p01-thermometer class diagram
+
+title p01 — Thermometer & Humidity Monitor
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam packageStyle rectangle
+
+package "ua.crowpi.core" {
+    interface CrowPiProject {
+        +getName(): String
+        +getProjectId(): String
+        +getDescription(): String
+        +run(mockMode: boolean): void
+        +shutdown(): void
+    }
+
+    interface "SensorReader<T>" as SensorReader {
+        +read(): T
+    }
+
+    interface GpioFacade {
+        +setOutput(pin: int, high: boolean): void
+        +readInput(pin: int): boolean
+        +addListener(pin: int, listener: PinChangeListener): void
+        +pwm(pin: int, freqHz: int, duty: float): void
+        +close(): void
+    }
+
+    interface I2cFacade {
+        +writeByte(addr: int, reg: int, val: byte): void
+        +readByte(addr: int, reg: int): byte
+        +readBytes(addr: int, reg: int, len: int): byte[]
+    }
+
+    class MockGpioFacade implements GpioFacade
+    class MockI2cFacade implements I2cFacade
+    class "MockSensorReader<T>" as MockSensorReader implements SensorReader
+    class PropertiesLoader <<utility>>
+}
+
+package "ua.crowpi.projects.p01" {
+
+    class ThermometerProject implements CrowPiProject {
+        -{static} LCD_ADDR: int = 0x27
+        -{static} PIN_RGB_R: int = 22
+        -{static} PIN_RGB_G: int = 27
+        -{static} PIN_RGB_B: int = 17
+        -{static} PIN_BUZZER: int = 18
+        -{static} PIN_BTN1: int = 11
+        -{static} PIN_BTN2: int = 9
+        -gpio: GpioFacade
+        -lcd: I2cFacade
+        -sensor: SensorReader<TemperatureReading>
+        -scheduler: ScheduledExecutorService
+        -csvLogger: CsvDataLogger
+        -alertThreshold: double
+        -lastZone: ThermalZone
+        -running: AtomicBoolean
+        +ThermometerProject()
+        +ThermometerProject(gpio, lcd)
+        +run(mockMode: boolean): void
+        +shutdown(): void
+        -pollSensor(): void
+        -buzz(times: int): void
+        -lcdWriteLine(row: int, text: String): void
+        -setRgbColor(r, g, b: boolean): void
+    }
+
+    class TemperatureReading {
+        -temperatureC: double
+        -humidity: double
+        -timestamp: String
+        +TemperatureReading(tempC, humidity, timestamp)
+        +getTemperatureC(): double
+        +getHumidity(): double
+        +getTimestamp(): String
+        +toString(): String
+    }
+
+    enum ThermalZone {
+        COLD
+        COMFORT
+        HOT
+        -label: String
+        +getLabel(): String
+        +{static} forTemp(tempC: double): ThermalZone
+    }
+
+    class AlertConfig {
+        -alertThresholdCelsius: double
+        -pollIntervalSeconds: int
+        -logFile: String
+        +AlertConfig()
+        +getAlertThresholdCelsius(): double
+        +getPollIntervalSeconds(): int
+        +getLogFile(): String
+    }
+
+    class LcdDisplayHelper <<utility>> {
+        +{static} LCD_WIDTH: int = 16
+        +{static} formatLine1(reading: TemperatureReading): String
+        +{static} formatLine2(zone: ThermalZone): String
+        +{static} pad16(s: String): String
+    }
+
+    class Dht11Reader implements SensorReader {
+        +{static} DHT11_PIN: int = 4
+        -{static} START_LOW_MS: long
+        -{static} TOTAL_BITS: int
+        -gpio: GpioFacade
+        +Dht11Reader(gpio: GpioFacade)
+        +read(): TemperatureReading
+        -waitForLevel(level, maxLoops): boolean
+        -sleepMs(ms: long): void
+    }
+
+    class CsvDataLogger {
+        -{static} HEADERS: String[]
+        -filePath: String
+        +CsvDataLogger(filePath: String)
+        +log(reading, zone, threshold): void
+    }
+}
+
+' Relationships
+ThermometerProject --> GpioFacade : uses
+ThermometerProject --> I2cFacade : uses
+ThermometerProject --> "SensorReader<TemperatureReading>" : polls
+ThermometerProject --> AlertConfig : loads config
+ThermometerProject --> LcdDisplayHelper : formats display
+ThermometerProject --> CsvDataLogger : logs to CSV
+ThermometerProject --> ThermalZone : classifies reading
+ThermometerProject --> TemperatureReading : processes
+
+Dht11Reader --> GpioFacade : bit-bangs
+Dht11Reader ..> TemperatureReading : creates
+
+CsvDataLogger ..> TemperatureReading : reads
+CsvDataLogger ..> ThermalZone : reads
+
+LcdDisplayHelper ..> TemperatureReading : reads
+LcdDisplayHelper ..> ThermalZone : reads
+
+AlertConfig --> PropertiesLoader : uses
+
+ThermalZone ..> TemperatureReading : classifies
+
+note right of ThermometerProject
+  Production constructor: ThermometerProject()
+  Test constructor: ThermometerProject(gpio, lcd)
+  Scheduler period: AlertConfig.pollIntervalSeconds
+end note
+
+note bottom of ThermalZone
+  COLD    : tempC < 18°C  → blue LED
+  COMFORT : 18 ≤ tempC ≤ 28°C → green LED
+  HOT     : tempC > 28°C  → red LED
+end note
+
+@enduml

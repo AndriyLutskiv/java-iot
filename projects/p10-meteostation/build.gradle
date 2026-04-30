@@ -1,0 +1,5 @@
+// p10-meteostation — Weather Station with Trend Forecast
+// Demonstrates: generic RingBuffer, linear regression, HTML report generation, CSV export
+dependencies {
+    implementation project(':core')
+}

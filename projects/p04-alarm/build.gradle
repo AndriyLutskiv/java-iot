@@ -1,0 +1,5 @@
+// p04-alarm — Alarm System with PIN Code
+// Demonstrates: FSM pattern, SHA-256 hashing, GPIO polling, PWM siren
+dependencies {
+    implementation project(':core')
+}

@@ -1,0 +1,5 @@
+// p03-music-box — IR Remote Music Box with PWM melodies
+// Demonstrates: Thread management, volatile state, enum, PWM audio, IR decoding
+dependencies {
+    implementation project(':core')
+}

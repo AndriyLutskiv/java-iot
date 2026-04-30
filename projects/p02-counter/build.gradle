@@ -1,0 +1,5 @@
+// p02-counter — Motion Event Counter with 7-segment display
+// Demonstrates: GPIO listeners, volatile state, enum modes, file logging
+dependencies {
+    implementation project(':core')
+}

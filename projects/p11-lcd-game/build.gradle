@@ -1,0 +1,5 @@
+// p11-lcd-game — LCD Platform Game
+// Demonstrates: game loop, double buffering, physics simulation, JSON leaderboard, concurrent threads
+dependencies {
+    implementation project(':core')
+}

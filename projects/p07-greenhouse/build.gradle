@@ -1,0 +1,5 @@
+// p07-greenhouse — Automatic Greenhouse Controller
+// Demonstrates: SPI sensor, rules engine, CSV logging, scheduled monitoring
+dependencies {
+    implementation project(':core')
+}

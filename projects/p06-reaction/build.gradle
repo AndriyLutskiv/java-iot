@@ -1,0 +1,5 @@
+// p06-reaction — Reaction Speed Trainer (2 Players)
+// Demonstrates: concurrency, AtomicLong, GPIO listeners, game loop
+dependencies {
+    implementation project(':core')
+}

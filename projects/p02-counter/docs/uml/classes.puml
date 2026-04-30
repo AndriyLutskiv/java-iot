@@ -1,0 +1,157 @@
+@startuml p02-counter-class-diagram
+title p02 — Motion Event Counter: Class Diagram
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam ArrowColor #444444
+skinparam ClassBorderColor #555555
+skinparam ClassBackgroundColor #FAFAFA
+skinparam NoteBackgroundColor #FFFDE7
+skinparam NoteBorderColor #BCAAA4
+
+' ─────────────────────────────────────────────
+' Core interfaces (from :core module)
+' ─────────────────────────────────────────────
+
+package "ua.crowpi.core" <<Frame>> {
+
+    interface CrowPiProject {
+        + getName() : String
+        + getProjectId() : String
+        + getDescription() : String
+        + run(mockMode : boolean) : void
+        + shutdown() : void
+    }
+
+    interface GpioFacade {
+        + setOutput(pin : int, high : boolean) : void
+        + readInput(pin : int) : boolean
+        + addListener(pin : int, listener : PinChangeListener) : void
+        + pwm(pin : int, frequencyHz : int, dutyCycle : float) : void
+        + close() : void
+    }
+
+    interface PinChangeListener <<FunctionalInterface>> {
+        + onPinChange(pin : int, high : boolean) : void
+    }
+
+    class MockGpioFacade implements GpioFacade {
+        - outputStates : Map<Integer, Boolean>
+        - listeners : Map<Integer, List<PinChangeListener>>
+        - simulator : ScheduledExecutorService
+        + MockGpioFacade()
+        - fireAllListeners() : void
+    }
+}
+
+' ─────────────────────────────────────────────
+' p02 module classes
+' ─────────────────────────────────────────────
+
+package "ua.crowpi.projects.p02" <<Frame>> {
+
+    enum CounterMode {
+        COUNT_UP
+        COUNTDOWN
+        --
+        - label : String
+        + getLabel() : String
+        + toggle() : CounterMode
+    }
+
+    class EventRecord {
+        - time : LocalDateTime
+        - mode : CounterMode
+        - value : int
+        --
+        + EventRecord(time, mode, value)
+        + getTime() : LocalDateTime
+        + getMode() : CounterMode
+        + getValue() : int
+        + toLogLine() : String
+    }
+
+    class SevenSegmentDisplay {
+        + {static} SEGMENT_PINS : int[]
+        + {static} SEGMENTS : int[][]
+        - gpio : GpioFacade
+        --
+        + SevenSegmentDisplay(gpio : GpioFacade)
+        + showDigit(digit : int) : void
+        + clear() : void
+    }
+
+    class EventFileLogger {
+        - filePath : Path
+        --
+        + EventFileLogger(filePath : String)
+        + append(record : EventRecord) : void
+    }
+
+    class CounterProject implements CrowPiProject {
+        - {static} PIR_PIN : int = 26
+        - {static} BUTTON1_PIN : int = 11
+        - {static} BUTTON2_PIN : int = 9
+        - {static} BUZZER_PIN : int = 18
+        ~ counter : volatile int
+        ~ mode : volatile CounterMode
+        ~ countdownStart : volatile int
+        ~ running : volatile boolean
+        - gpio : GpioFacade
+        --
+        + CounterProject()
+        + CounterProject(gpio : GpioFacade)
+        + getName() : String
+        + getProjectId() : String
+        + getDescription() : String
+        + run(mockMode : boolean) : void
+        + shutdown() : void
+        - buzzOnce() : void
+    }
+}
+
+' ─────────────────────────────────────────────
+' Relationships
+' ─────────────────────────────────────────────
+
+CounterProject "1" *--> "1" GpioFacade         : uses (injected)
+CounterProject "1" *--> "1" SevenSegmentDisplay : creates & drives
+CounterProject "1" *--> "1" EventFileLogger     : creates & uses
+CounterProject "1" *--> "1" CounterMode         : holds volatile mode
+
+SevenSegmentDisplay "1" --> "1" GpioFacade      : drives segment pins
+
+EventRecord "1" --> "1" CounterMode             : records active mode
+EventFileLogger "1" ..> "1" EventRecord         : appends toLogLine()
+
+CounterProject ..> EventRecord                  : creates on each PIR event
+CounterProject ..> PinChangeListener            : registers lambdas
+
+MockGpioFacade ..> PinChangeListener            : fires every 5 s
+
+' ─────────────────────────────────────────────
+' Notes
+' ─────────────────────────────────────────────
+
+note bottom of CounterProject
+  GPIO pin map (BCM):
+  PIR     → GPIO 26
+  Button1 → GPIO 11  (RESET / countdown start)
+  Button2 → GPIO  9  (mode toggle)
+  Buzzer  → GPIO 18  (PWM)
+  Seg A–G → GPIO 6,13,19,21,20,16,12
+end note
+
+note right of SevenSegmentDisplay
+  SEGMENTS[digit][segment]
+  segment order: A B C D E F G
+  1 = lit, 0 = off
+end note
+
+note right of EventFileLogger
+  Writes to logs/events.log
+  StandardOpenOption.APPEND | CREATE
+  Format: "2024-01-15T14:23:11 | COUNT_UP | value=7"
+end note
+
+@enduml

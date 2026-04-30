@@ -1,0 +1,56 @@
+@startuml p04-alarm-fsm
+title p04 Alarm System — FSM State Diagram
+
+skinparam monochrome false
+skinparam shadowing false
+skinparam state {
+    BackgroundColor<<disarmed>>  #90EE90
+    BackgroundColor<<armed>>     #FFD700
+    BackgroundColor<<triggered>> #FF6B6B
+    BackgroundColor<<locked>>    #DA70D6
+    BorderColor Black
+    FontSize 13
+}
+
+' ─── States ──────────────────────────────────────────────────────────────────
+[*] --> DISARMED : power-on / reset()
+
+state DISARMED <<disarmed>> : RGB: GREEN\nRelay: OFF\nSiren: OFF
+state ARMED    <<armed>>    : RGB: YELLOW\nRelay: OFF\nSiren: OFF
+state TRIGGERED <<triggered>> : RGB: RED\nRelay: ON\nSiren: PLAYING
+state LOCKED   <<locked>>   : RGB: PURPLE\nRelay: OFF\nSiren: OFF
+
+' ─── Transitions ─────────────────────────────────────────────────────────────
+DISARMED   --> ARMED      : CORRECT_PIN\n[arm the system]
+ARMED      --> DISARMED   : CORRECT_PIN\n[disarm the system]
+ARMED      --> TRIGGERED  : PIR_TRIGGERED\n[motion detected]
+TRIGGERED  --> DISARMED   : CORRECT_PIN\n[dismiss alarm]
+DISARMED   --> LOCKED     : [3 wrong PINs]\n(AlarmProject.activateLockout)
+ARMED      --> LOCKED     : [3 wrong PINs]\n(AlarmProject.activateLockout)
+TRIGGERED  --> LOCKED     : [3 wrong PINs]\n(AlarmProject.activateLockout)
+LOCKED     --> DISARMED   : LOCK_EXPIRED\n[timer fires after 30 s]
+
+' ─── Notes ───────────────────────────────────────────────────────────────────
+note right of LOCKED
+  Entered externally via
+  AlarmFsm.setState(LOCKED)
+  when PinValidator.isLockedOut()
+  returns true.
+  Timer scheduled via
+  ScheduledExecutorService.
+end note
+
+note right of TRIGGERED
+  SirenPlayer daemon thread
+  alternates 880 Hz / 660 Hz
+  every 300 ms.
+  RelayController pin 21 = HIGH.
+end note
+
+note left of DISARMED
+  Initial state.
+  AlarmFsm.reset() always
+  returns here.
+end note
+
+@enduml

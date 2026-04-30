@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ua.crowpi.core.launcher.ProjectRegistryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-04-02T07:08:07" hostname="a0" time="0.865">
+  <properties/>
+  <testcase name="testFindById_unknownId_returnsEmpty()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.83"/>
+  <testcase name="testFindById_existingId_returnsProject()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.007"/>
+  <testcase name="testRegister_projectAppearsInList()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.002"/>
+  <testcase name="testFindById_caseInsensitive()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.002"/>
+  <testcase name="testFindById_nullId_returnsEmpty()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.001"/>
+  <testcase name="testRegister_multipleProjectsSortedById()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.005"/>
+  <testcase name="testGetAllProjects_returnsUnmodifiableView()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.005"/>
+  <testcase name="testRegister_nullProject_throwsException()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.002"/>
+  <testcase name="testSize_emptyRegistry_returnsZero()" classname="ua.crowpi.core.launcher.ProjectRegistryTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

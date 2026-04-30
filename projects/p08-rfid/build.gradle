@@ -1,0 +1,5 @@
+// p08-rfid — RFID Door Lock with access control
+// Demonstrates: SPI communication, HashMap access control, Log4j2 logging, relay control
+dependencies {
+    implementation project(':core')
+}

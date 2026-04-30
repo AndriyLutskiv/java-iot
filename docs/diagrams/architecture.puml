@@ -1,0 +1,163 @@
+@startuml crowpi_architecture
+!theme plain
+title CrowPi Java Suite — Module Architecture
+
+package "core" {
+    interface CrowPiProject {
+        + getName() : String
+        + getProjectId() : String
+        + getDescription() : String
+        + run(mockMode : boolean) : void
+        + shutdown() : void
+    }
+
+    class Launcher {
+        + {static} main(args : String[]) : void
+        - {static} parseArgs(args : String[]) : CommandLine
+        - {static} runProjectDirectly(...) : void
+        - {static} printProjectList(...) : void
+    }
+
+    class ProjectRegistry {
+        - projects : List<CrowPiProject>
+        + getAllProjects() : List<CrowPiProject>
+        + findById(id : String) : Optional<CrowPiProject>
+        + register(project : CrowPiProject) : void
+        + size() : int
+    }
+
+    class InteractiveMenu {
+        - registry : ProjectRegistry
+        + show(mockMode : boolean) : void
+        - printBanner(...) : void
+    }
+
+    package "hardware" {
+        interface GpioFacade {
+            + setOutput(pin, high) : void
+            + readInput(pin) : boolean
+            + addListener(pin, listener) : void
+            + pwm(pin, freqHz, duty) : void
+            + close() : void
+        }
+        interface I2cFacade {
+            + writeByte(addr, reg, val) : void
+            + readByte(addr, reg) : byte
+            + readBytes(addr, reg, len) : byte[]
+        }
+        interface PwmFacade {
+            + setPwm(pin, freqHz, duty) : void
+            + stopPwm(pin) : void
+            + close() : void
+        }
+        interface SpiFacade {
+            + transfer(data : byte[]) : byte[]
+            + close() : void
+        }
+        interface SensorReader<T> {
+            + read() : T
+        }
+        interface PinChangeListener <<FunctionalInterface>> {
+            + onPinChange(pin, high) : void
+        }
+    }
+
+    package "mock" {
+        class MockGpioFacade {
+            - outputStates : Map<Integer,Boolean>
+            - listeners : Map<Integer,List<PinChangeListener>>
+            - simulator : ScheduledExecutorService
+        }
+        class MockI2cFacade {
+            - lcdLine1 : char[]
+            - lcdLine2 : char[]
+        }
+        class MockPwmFacade {
+            - activeChannels : Map<Integer,String>
+        }
+        class MockSpiFacade {
+            - nextResponse : byte[]
+            + setNextResponse(byte[]) : void
+        }
+        class MockSensorReader<T> {
+            - values : List<T>
+            - index : AtomicInteger
+            + getCycleSize() : int
+        }
+    }
+
+    package "exception" {
+        class HardwareException <<checked>>
+        class DatabaseException <<checked>>
+        class ConfigException <<unchecked>>
+    }
+
+    package "util" {
+        class GracefulShutdown {
+            + {static} register(project) : void
+            + {static} registerAll(projects) : void
+        }
+        class PropertiesLoader {
+            + {static} load(path) : Properties
+            + {static} getString(props, key) : String
+            + {static} getInt(props, key) : int
+            + {static} getDouble(props, key) : double
+            + {static} getStringOrDefault(...) : String
+            + {static} getIntOrDefault(...) : int
+        }
+    }
+}
+
+package "projects" {
+    class p01_ThermometerProject
+    class p02_CounterProject
+    class p03_MusicBoxProject
+    class p04_AlarmProject
+    class p05_RadarProject
+    class p06_ReactionProject
+    class p07_GreenhouseProject
+    class p08_RfidProject
+    class p09_SmartHomeProject
+    class p10_MeteostationProject
+    class p11_LcdGameProject
+}
+
+' Launcher використовує реєстр і меню
+Launcher --> ProjectRegistry
+Launcher --> InteractiveMenu
+Launcher --> GracefulShutdown
+InteractiveMenu --> ProjectRegistry
+InteractiveMenu --> GracefulShutdown
+
+' Реєстр зберігає проекти через інтерфейс
+ProjectRegistry "1" o-- "*" CrowPiProject
+
+' Усі проекти реалізують CrowPiProject
+p01_ThermometerProject ..|> CrowPiProject
+p02_CounterProject ..|> CrowPiProject
+p03_MusicBoxProject ..|> CrowPiProject
+p04_AlarmProject ..|> CrowPiProject
+p05_RadarProject ..|> CrowPiProject
+p06_ReactionProject ..|> CrowPiProject
+p07_GreenhouseProject ..|> CrowPiProject
+p08_RfidProject ..|> CrowPiProject
+p09_SmartHomeProject ..|> CrowPiProject
+p10_MeteostationProject ..|> CrowPiProject
+p11_LcdGameProject ..|> CrowPiProject
+
+' Mock реалізації апаратних інтерфейсів
+MockGpioFacade ..|> GpioFacade
+MockI2cFacade ..|> I2cFacade
+MockPwmFacade ..|> PwmFacade
+MockSpiFacade ..|> SpiFacade
+MockSensorReader ..|> SensorReader
+
+' GpioFacade використовує PinChangeListener
+GpioFacade ..> PinChangeListener
+
+' Виключення успадкування
+HardwareException --|> Exception
+DatabaseException --|> Exception
+ConfigException --|> RuntimeException
+
+@enduml
