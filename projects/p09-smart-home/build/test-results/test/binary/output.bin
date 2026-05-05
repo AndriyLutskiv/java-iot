@@ -1,1 +1,0 @@
-@[MOCK SENSOR] read() → DhtReading{temp=30.0°C, humidity=60%}

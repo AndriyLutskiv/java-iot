@@ -7,37 +7,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Value object that maps one entry from the NBU (National Bank of Ukraine) exchange-rate
  * JSON array to a Java object.
  *
- * <p>Example JSON entry returned by the API:</p>
+ * <p>Example JSON entry returned by the API
+ * ({@code https://bank.gov.ua/NBU_Exchange/exchange?json}):</p>
  * <pre>
  * {
- *   "StartDate": "30.03.2026",
- *   "CurrencyCodeL": "USD",
- *   "Units": 1,
- *   "Amount": 41.2345,
- *   "special": null
+ *   "r030":         840,
+ *   "txt":          "Долар США",
+ *   "rate":         41.2345,
+ *   "cc":           "USD",
+ *   "exchangedate": "22.03.2026"
  * }
  * </pre>
  *
  * <p>{@code @JsonIgnoreProperties(ignoreUnknown = true)} дозволяє ігнорувати будь-які
- * додаткові поля, що можуть з'явитися в API у майбутньому.</p>
+ * додаткові поля (наприклад {@code r030}), що можуть з'явитися в API у майбутньому.</p>
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyRate {
 
     /** ISO 4217 currency code, e.g. {@code "USD"} or {@code "EUR"}. */
-    @JsonProperty("CurrencyCodeL")
+    @JsonProperty("cc")
     private String currencyCode;
 
     /** Ukrainian name of the currency, e.g. {@code "Долар США"}. */
-    @JsonProperty("CurrencyCode")
+    @JsonProperty("txt")
     private String currencyName;
 
     /** Exchange rate of one unit of this currency against UAH (Ukrainian Hryvnia). */
-    @JsonProperty("Amount")
+    @JsonProperty("rate")
     private double rate;
 
     /** Date of this exchange rate in {@code "dd.MM.yyyy"} format. */
-    @JsonProperty("StartDate")
+    @JsonProperty("exchangedate")
     private String exchangeDate;
 
     /**

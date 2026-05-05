@@ -1,6 +1,0 @@
-[OVERRIDE] Pump forced → ON
-X[CONTROLLER] soil=60% (min=40), temp=22.0C (max=30.0), forced=true → pump=ON, fan=OFF
-X[CONTROLLER] soil=20% (min=40), temp=35.0C (max=30.0), forced=false → pump=ON, fan=ON
-Z[CONTROLLER] soil=60% (min=40), temp=22.0C (max=30.0), forced=false → pump=OFF, fan=OFF
-Y[CONTROLLER] soil=20% (min=40), temp=22.0C (max=30.0), forced=false → pump=ON, fan=OFF
-Y[CONTROLLER] soil=60% (min=40), temp=35.0C (max=30.0), forced=false → pump=OFF, fan=ON

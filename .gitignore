@@ -1,4 +1,124 @@
-.idea/**
-.claude/**
+# ======================================================================
+# .gitignore — CrowPi Java Educational Suite
+# ======================================================================
+#
+# Стратегія:
+#   • Ігнорувати ВСЕ, що генерується автоматично (збірка, IDE, ОС)
+#   • ЗБЕРЕГТИ у репо лише два фінальних fat JAR-и, щоб студенти могли
+#     запускати проект на Raspberry Pi без локальної збірки:
+#         build/libs/crowpi-suite-1.0.0.jar   ← консольний лаунчер
+#         ui/build/libs/crowpi-ui-1.0.0.jar   ← графічний Swing-лаунчер
+#   • ЗБЕРЕГТИ gradle/wrapper/gradle-wrapper.jar — він навмисно
+#     включений у репо (дозволяє ./gradlew без глобально встановленого Gradle)
+#
+# Важлива техніка для re-include у git:
+#   Якщо директорія виключена через "build/" (сама директорія ігнорується),
+#   git не може повернути файл всередині неї через "!". Тому ми виключаємо
+#   ВМІСТ через "build/**" (директорія залишається видимою для git), а потім
+#   точково повертаємо потрібні файли через "!".
+# ======================================================================
+
+
+# ── Gradle: кеш і локальний стан ───────────────────────────────────────
+# Містить daemon-файли, кеш залежностей, build scan — машинно-специфічне.
+.gradle/
+
+
+# ── Gradle: результати збірки ───────────────────────────────────────────
+
+# Кореневий build/: виключаємо ВМІСТ (не директорію!), щоб можна було
+# повернути fat JAR через "!" нижче. Якби тут стояло "build/" (без **),
+# git проігнорував би ALL усередині і "!" не спрацював би.
+build/**
+!build/libs/
+!build/libs/crowpi-suite-1.0.0.jar
+
+# UI-модуль: аналогічна схема — зберігаємо лише UI fat JAR
+ui/build/**
+!ui/build/libs/
+!ui/build/libs/crowpi-ui-1.0.0.jar
+
+# Проміжні build/ решти модулів — виключаємо директорію цілком
+# (всередині немає артефактів, які треба зберігати)
+core/build/
+projects/build/
+projects/p01-thermometer/build/
+projects/p02-counter/build/
+projects/p03-music-box/build/
+projects/p04-alarm/build/
+projects/p05-radar/build/
+projects/p06-reaction/build/
+projects/p07-greenhouse/build/
+projects/p08-rfid/build/
+projects/p09-smart-home/build/
+projects/p10-meteostation/build/
+projects/p11-lcd-game/build/
+projects/p12-currency-clock/build/
+
+
+# ── IntelliJ IDEA ──────────────────────────────────────────────────────
+# .idea/ — налаштування проекту IDEA (workspace, modules, run configs).
+# Більшість файлів прив'язані до конкретного розробника / машини.
+# Виняток: gradle/wrapper/gradle-wrapper.jar залишається відстежуваним
+# (він не підпадає під жоден з цих патернів).
+.idea/
 *.iml
-.gradle/**
+*.ipr
+*.iws
+out/
+
+
+# ── Visual Studio Code ─────────────────────────────────────────────────
+# launch.json, settings.json, tasks.json — прив'язані до локального оточення.
+.vscode/
+*.code-workspace
+
+
+# ── Eclipse ────────────────────────────────────────────────────────────
+.classpath
+.project
+.settings/
+bin/
+*.launch
+
+
+# ── NetBeans ───────────────────────────────────────────────────────────
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+
+# ── OS-специфічні файли ─────────────────────────────────────────────────
+
+# macOS: метадані Finder, атрибути ресурсів, іконки папок
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows: мініатюри, індекс пошуку, кошик
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux: резервні копії текстових редакторів
+*~
+
+
+# ── Тимчасові файли та логи ─────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+
+
+# ── Claude Code ─────────────────────────────────────────────────────────
+# Локальна пам'ять і налаштування Claude Code CLI — не потрібні у спільному репо.
+.claude/
